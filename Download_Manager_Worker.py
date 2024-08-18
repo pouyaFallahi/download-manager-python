@@ -11,6 +11,8 @@ class DownloadWorker(QThread):
     error = pyqtSignal(str)
     paused = pyqtSignal()
     resumed = pyqtSignal()
+    cancelled = pyqtSignal()
+    file_size = pyqtSignal(int)
 
     def __init__(self, url, download_path):
         super().__init__()
@@ -35,6 +37,9 @@ class DownloadWorker(QThread):
             if response.status_code in (200, 206):
                 content_type = response.headers.get('Content-Type', '').split(';')[0]
                 file_extension = self.get_file_extension(content_type)
+
+                total_length = int(response.headers.get('content-length', 0))
+                self.file_size.emit(total_length)
 
                 if not '.' in file_name:
                     file_name = f"{file_name}.{file_extension}"
