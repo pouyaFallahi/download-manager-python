@@ -10,6 +10,18 @@
     <height>442</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>551</width>
+    <height>442</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>551</width>
+    <height>442</height>
+   </size>
+  </property>
   <property name="cursor">
    <cursorShape>ArrowCursor</cursorShape>
   </property>
@@ -326,7 +338,7 @@
     </rect>
    </property>
    <property name="text">
-    <string> </string>
+    <string/>
    </property>
   </widget>
   <widget class="QLabel" name="add_url_text">

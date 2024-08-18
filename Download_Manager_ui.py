@@ -15,6 +15,8 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(551, 442)
+        Dialog.setMinimumSize(QtCore.QSize(551, 442))
+        Dialog.setMaximumSize(QtCore.QSize(551, 442))
         Dialog.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
         Dialog.setMouseTracking(False)
         Dialog.setTabletTracking(False)
@@ -97,6 +99,7 @@ class Ui_Dialog(object):
         self.file_size_text.setObjectName("file_size_text")
         self.file_size_display = QtWidgets.QLabel(Dialog)
         self.file_size_display.setGeometry(QtCore.QRect(280, 230, 54, 21))
+        self.file_size_display.setText("")
         self.file_size_display.setObjectName("file_size_display")
         self.add_url_text = QtWidgets.QLabel(Dialog)
         self.add_url_text.setGeometry(QtCore.QRect(10, 10, 61, 17))
@@ -125,7 +128,6 @@ class Ui_Dialog(object):
         self.url_input.setToolTip(_translate("Dialog", "Enter your URL and click on Button add URL"))
         self.status_bar_text.setText(_translate("Dialog", "Status:"))
         self.file_size_text.setText(_translate("Dialog", "File Size:"))
-        self.file_size_display.setText(_translate("Dialog", " "))
         self.add_url_text.setText(_translate("Dialog", "Add URLs:"))
 
 
