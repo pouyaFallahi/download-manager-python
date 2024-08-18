@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 from PyQt5.QtCore import QThread, pyqtSignal
 
@@ -6,6 +7,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 class DownloadWorker(QThread):
     progress = pyqtSignal(int)
     finished = pyqtSignal(str)
+    remaining_time = pyqtSignal(int)
     error = pyqtSignal(str)
     paused = pyqtSignal()
     resumed = pyqtSignal()
@@ -46,6 +48,7 @@ class DownloadWorker(QThread):
 
                 with open(file_path, 'ab') as file:
                     downloaded = existing_file_size
+                    start_time = time.time()
                     for chunk in response.iter_content(chunk_size=1024):
                         if self._stop:
                             return
@@ -59,10 +62,18 @@ class DownloadWorker(QThread):
                             downloaded += len(chunk)
                             percent = (downloaded / total_length) * 100
                             self.progress.emit(int(percent))
+
+                            elapsed_time = time.time() - start_time
+                            if elapsed_time > 0:
+                                speed = downloaded / elapsed_time
+                                remaining_data = total_length - downloaded
+                                if speed > 0:
+                                    remaining_time_estimate = int(remaining_data / speed)
+                                    self.remaining_time.emit(remaining_time_estimate)
                 if not self._stop:
-                    self.finished.emit(f"{file_name} دانلود شد.")
+                    self.finished.emit(f"{file_name} Downloaded")
             else:
-                self.error.emit(f"خطا در دانلود فایل. وضعیت: {response.status_code}")
+                self.error.emit(f"Error downloading the file. Status: {response.status_code}")
         except Exception as e:
             self.error.emit(f"Exception: {str(e)}")
 

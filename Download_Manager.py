@@ -3,15 +3,12 @@ import sys
 from Download_Manager_Worker import DownloadWorker
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget, QPushButton, QLineEdit, QTextEdit,
                              QListWidget, QFileDialog, QProgressBar)
+from Download_Manager_ui import Ui_Dialog
 
-
-class DownloadManager(QMainWindow):
+class DownloadManager(QMainWindow, Ui_Dialog):
     def __init__(self):
         super().__init__()
-
-        self.setWindowTitle("Download Manager")
-        self.setGeometry(100, 100, 600, 400)
-
+        self.setupUi(self)
         self.url_list = []
         self.workers = []
         self.default_download_path = os.path.join(os.path.expanduser('~'), 'Downloads')
@@ -19,53 +16,19 @@ class DownloadManager(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        self.layout = QVBoxLayout()
-        self.central_widget.setLayout(self.layout)
-
-        self.url_input = QLineEdit(self)
-        self.url_input.setPlaceholderText("Enter download URL")
-        self.layout.addWidget(self.url_input)
-
-        self.add_button = QPushButton("Add URL", self)
         self.add_button.clicked.connect(self.add_url)
-        self.layout.addWidget(self.add_button)
-
-        self.url_list_widget = QListWidget(self)
-        self.layout.addWidget(self.url_list_widget)
-
-        self.download_button = QPushButton("Start Download", self)
         self.download_button.clicked.connect(self.start_download)
-        self.layout.addWidget(self.download_button)
-
-        self.change_path_button = QPushButton("Change Download Path", self)
         self.change_path_button.clicked.connect(self.change_download_path)
-        self.layout.addWidget(self.change_path_button)
-
-        self.pause_button = QPushButton("Pause", self)
         self.pause_button.clicked.connect(self.pause_download)
-        self.layout.addWidget(self.pause_button)
-
-        self.resume_button = QPushButton("Resume", self)
         self.resume_button.clicked.connect(self.resume_download)
-        self.layout.addWidget(self.resume_button)
-
-        self.cancel_button = QPushButton("Cancel", self)
         self.cancel_button.clicked.connect(self.cancel_download)
-        self.layout.addWidget(self.cancel_button)
 
-        self.progress_output = QTextEdit(self)
-        self.progress_output.setReadOnly(True)
-        self.layout.addWidget(self.progress_output)
-
-        self.progress_bar = QProgressBar(self)
-        self.layout.addWidget(self.progress_bar)
-
-        # Initialize buttons state
         self.pause_button.setEnabled(False)
         self.resume_button.setEnabled(False)
         self.cancel_button.setEnabled(False)
+
+        self.remove_1.clicked.connect(self.remove_selected_url)
+        self.remove_all.clicked.connect(self.remove_all_urls)
 
     def add_url(self):
         url = self.url_input.text()
@@ -73,6 +36,18 @@ class DownloadManager(QMainWindow):
             self.url_list.append(url)
             self.url_list_widget.addItem(url)
             self.url_input.clear()
+
+    def remove_selected_url(self):
+        selected_items = self.url_list_widget.selectedItems()
+        if not selected_items:
+            return
+        for item in selected_items:
+            self.url_list.remove(item.text())
+            self.url_list_widget.takeItem(self.url_list_widget.row(item))
+
+    def remove_all_urls(self):
+        self.url_list_widget.clear()
+        self.url_list.clear()
 
     def start_download(self):
         self.progress_output.clear()
@@ -93,6 +68,7 @@ class DownloadManager(QMainWindow):
             worker.error.connect(self.on_error)
             worker.paused.connect(self.on_paused)
             worker.resumed.connect(self.on_resumed)
+            worker.remaining_time.connect(self.update_remaining_time)
             self.workers.append(worker)
             worker.start()
 
@@ -149,6 +125,12 @@ class DownloadManager(QMainWindow):
             worker.quit()
             worker.wait()
         event.accept()
+
+    def update_remaining_time(self, seconds):
+        minutes, seconds = divmod(seconds, 60)
+        time_str= f'{minutes:02}:{seconds:02}'
+
+        self.remaining_time.setText(time_str)
 
 
 if __name__ == "__main__":
